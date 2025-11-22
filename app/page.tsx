@@ -163,9 +163,12 @@ export default function HomePage() {
             {features.map((feature, i) => {
               const Icon = feature.icon
               const images = [
-                "/images/patient-health.jpg",
-                "/images/medication-pills.jpg",
-                "/images/doctor-consultation.jpg",
+                "https://i.pinimg.com/1200x/8b/83/f8/8b83f837ba741bc70e06c7fe0a66c367.jpg",
+                "https://i.pinimg.com/1200x/18/2c/a7/182ca7f420be7d11cf979cefbb6f78f1.jpg",
+                "https://i.pinimg.com/1200x/37/9d/dc/379ddcc32d24d5a7e712ab4d2a8a65cd.jpg",
+                "https://i.pinimg.com/1200x/b3/2f/71/b32f71050a80b102107e7c8b86ee2501.jpg",
+                "https://i.pinimg.com/736x/89/8b/7e/898b7eac0382b77db7cf493752305234.jpg",
+                "https://i.pinimg.com/1200x/3e/7c/0c/3e7c0c2695d71d93e75a387688ce4ca5.jpg",
               ]
               return (
                 <div
