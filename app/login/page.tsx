@@ -26,17 +26,21 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role }),
       })
 
       if (!response.ok) {
-        throw new Error("Login failed")
+        const ct = response.headers.get('content-type') || ''
+        const body = ct.includes('application/json') ? await response.json().catch(() => ({})) : await response.text().catch(() => '')
+        const msg = (body && body.error) || (typeof body === 'string' && body) || 'Login failed'
+        throw new Error(msg)
       }
 
-      const data = await response.json()
+      const ct = response.headers.get('content-type') || ''
+      const data = ct.includes('application/json') ? await response.json().catch(() => ({})) : null
       router.push(`/${role}/dashboard`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")

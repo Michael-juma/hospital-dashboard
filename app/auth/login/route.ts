@@ -1,36 +1,27 @@
-// Login API route
-import { type NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from 'next/server'
+import prisma from '../../../lib/prisma'
+import { verifyPassword, createToken, setSessionCookie } from '../../../lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, role } = await request.json()
+    const { email, password } = await request.json()
 
-    // Validate inputs
-    if (!email || !password || !role) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // TODO: Implement actual authentication with your database
-    // For demo purposes, create a mock session
-    const mockUser = {
-      id: "user_" + Math.random().toString(36).substr(2, 9),
-      email,
-      role,
-      name: email.split("@")[0],
-    }
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
 
-    const response = NextResponse.json({ user: mockUser, message: "Login successful" }, { status: 200 })
+    const ok = await verifyPassword(password, user.password)
+    if (!ok) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
 
-    // Set session cookie (you should use a secure session library in production)
-    response.cookies.set("session", JSON.stringify(mockUser), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      sameSite: "lax",
-    })
-
+    const token = createToken({ userId: user.id, role: user.role })
+    const response = NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, message: 'Login successful' }, { status: 200 })
+    setSessionCookie(response, token)
     return response
   } catch (error) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error('Login error', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
